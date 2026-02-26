@@ -2,19 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenDoro Elite | Deep Focus System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZenDoro Elite | Pro Heritage Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --bg: #000; --text: #fff; --accent: #007AFF; --danger: #FF3B30;
-            --glass: rgba(10, 10, 10, 0.5); --border: rgba(255, 255, 255, 0.06);
+            --glass: rgba(10, 10, 10, 0.4); --border: rgba(255, 255, 255, 0.05);
         }
         body.theme-dia { 
-            --bg: #F5F5F7; --text: #1D1D1F; --glass: rgba(255, 255, 255, 0.6); --border: rgba(0, 0, 0, 0.06); 
+            --bg: #F5F5F7; --text: #1D1D1F; --glass: rgba(255, 255, 255, 0.5); --border: rgba(0, 0, 0, 0.05); 
             --accent: #0071E3;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "SF Pro Display", -apple-system, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "SF Pro Display", -apple-system, sans-serif; touch-action: manipulation; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: crosshair; }
         #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .ui-wrapper { position: relative; z-index: 10; height: 100vh; width: 100%; display: flex; justify-content: space-between; padding: 40px; pointer-events: none; }
@@ -25,49 +25,58 @@
             display: flex; flex-direction: column; gap: 10px; pointer-events: all;
             transition: 0.8s cubic-bezier(0.19, 1, 0.22, 1); width: 230px;
         }
-        .panel.collapsed-left { transform: translateX(-350px); opacity: 0; }
-        .panel.collapsed-right { transform: translateX(350px); opacity: 0; }
 
         .center-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
         
-        #quote-container { height: 60px; display: flex; align-items: center; justify-content: center; width: 85%; text-align: center; }
+        #quote-container { height: 70px; display: flex; align-items: center; justify-content: center; width: 85%; text-align: center; pointer-events: none; }
         #dynamic-quote { 
-            font-size: 11px; text-transform: uppercase; letter-spacing: 5px; opacity: 0;
-            transition: 2s ease; transform: translateY(10px); font-weight: 300; line-height: 1.8;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 5px; opacity: 0;
+            transition: 2s ease; transform: translateY(15px); font-weight: 300; line-height: 2;
         }
-        #dynamic-quote.visible { opacity: 0.4; transform: translateY(0); }
+        #dynamic-quote.visible { opacity: 0.5; transform: translateY(0); }
 
         #timer { font-size: 8.5rem; font-weight: 100; letter-spacing: -7px; margin: 0; font-variant-numeric: tabular-nums; pointer-events: none; }
-        #timer.overtime { color: var(--danger); text-shadow: 0 0 40px rgba(255, 59, 48, 0.2); }
+        
+        @media (max-width: 768px) {
+            .ui-wrapper { flex-direction: column; padding: 20px; justify-content: center; }
+            .panel { width: 90%; position: absolute; left: 5%; background: rgba(10,10,10,0.95); z-index: 100; }
+            #panel-left { top: 20px; transform: translateY(-150%); }
+            #panel-right { bottom: 80px; transform: translateY(150%); }
+            #panel-left.active-mob { transform: translateY(0); opacity: 1; }
+            #panel-right.active-mob { transform: translateY(0); opacity: 1; }
+            #timer { font-size: 4.5rem; letter-spacing: -2px; }
+        }
+
+        .panel.collapsed-left { transform: translateX(-350px); opacity: 0; }
+        .panel.collapsed-right { transform: translateX(350px); opacity: 0; }
 
         .main-btn { 
-            pointer-events: all; font-size: 0.7rem; background: var(--text); color: var(--bg);
-            border-radius: 50px; padding: 14px 40px; border: none; cursor: pointer; 
-            letter-spacing: 4px; font-weight: 600; text-transform: uppercase;
-            transition: 0.4s; margin-top: 25px;
+            pointer-events: all; font-size: 0.65rem; background: var(--text); color: var(--bg);
+            border-radius: 50px; padding: 14px 45px; border: none; cursor: pointer; 
+            letter-spacing: 4px; font-weight: 600; text-transform: uppercase; margin-top: 25px; transition: 0.3s;
         }
-        .main-btn:hover { letter-spacing: 6px; transform: scale(1.02); }
+        .main-btn:hover { letter-spacing: 6px; }
 
         button:not(.main-btn):not(.side-toggle) {
             background: rgba(120, 120, 120, 0.03); border: 1px solid var(--border);
             color: var(--text); padding: 11px; border-radius: 12px; font-size: 9px;
-            cursor: pointer; transition: 0.3s; width: 100%; text-align: left;
-            text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; width: 100%; text-align: left; text-transform: uppercase;
         }
-        button.active { background: var(--accent) !important; color: #fff !important; border: none; box-shadow: 0 5px 15px rgba(0,113,227,0.2); }
+        button.active { background: var(--accent) !important; color: #fff !important; }
 
         .side-toggle {
-            position: fixed; bottom: 40px; width: 42px; height: 42px; border-radius: 50%;
+            position: fixed; bottom: 30px; width: 45px; height: 45px; border-radius: 50%;
             border: 1px solid var(--border); background: var(--glass); color: var(--text);
-            cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 1000; display: flex; align-items: center; justify-content: center;
         }
-        #toggle-left { left: 40px; } #toggle-right { right: 95px; } #toggle-fs { right: 40px; }
-        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
+        #toggle-left { left: 30px; } #toggle-right { right: 85px; } #toggle-fs { right: 30px; }
+        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 2000; }
     </style>
 </head>
 <body class="theme-noche">
     <div id="flash"></div>
     <div id="canvas-container"></div>
+    
     <button class="side-toggle" id="toggle-left" onclick="togglePanel('left')">‹</button>
     <button class="side-toggle" id="toggle-right" onclick="togglePanel('right')">›</button>
     <button class="side-toggle" id="toggle-fs" onclick="handleFS()">⛶</button>
@@ -78,16 +87,13 @@
             <button onclick="setVisual('breath', this)" class="v-opt active">Respiración</button>
             <button onclick="setVisual('dna', this)" class="v-opt">ADN Helix</button>
             <button onclick="setVisual('pulse', this)" class="v-opt">Atómico</button>
-            <button onclick="setVisual('chaos', this)" class="v-opt">Caos</button>
-            <button onclick="setVisual('cinema', this)" class="v-opt">Cinema</button>
-            <button onclick="setVisual('hydro', this)" class="v-opt">Fluido</button>
             <button onclick="setVisual('vortex', this)" class="v-opt">Vórtice</button>
         </aside>
 
         <section class="center-content">
             <div id="quote-container"><span id="dynamic-quote"></span></div>
             <div id="timer">25:00</div>
-            <button class="main-btn" id="startBtn" onclick="handleStart()">Start Session</button>
+            <button class="main-btn" id="startBtn" onclick="handleStart()">Start</button>
         </section>
 
         <aside class="panel" id="panel-right">
@@ -96,19 +102,38 @@
             <button onclick="handleTime(45, this)" class="t-opt">45m Focus</button>
             <button onclick="handleTime(90, this)" class="t-opt">90m Deep Focus</button>
             <button onclick="handleTime(5, this)" class="t-opt">5m Break</button>
-            <h3 style="font-size: 9px; opacity: 0.3; letter-spacing: 2px; margin: 15px 0 8px 0;">INTERFACE</h3>
-            <button onclick="toggleTheme()">Dark / Light</button>
+            <button onclick="toggleTheme()" style="margin-top: 10px;">Dark / Light</button>
         </aside>
     </main>
 
     <script>
         let scene, camera, renderer, points, geometry;
         let vMode = 'breath';
-        const pCount = 12000;
-        let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
-        const randomOffsets = new Float32Array(pCount); // Para movimiento único por partícula
+        const pCount = window.innerWidth < 768 ? 6000 : 13000;
+        let targetX = 0, targetY = 0, mouseX = 0, mouseY = 0;
+        const randomOffsets = new Float32Array(pCount);
 
         const quotes = [
+            "La sencillez es la máxima sofisticación. — Leonardo da Vinci",
+            "No es que tengamos poco tiempo, sino que perdemos mucho. — Séneca",
+            "La felicidad de tu vida depende de la calidad de tus pensamientos. — Marco Aurelio",
+            "El único modo de hacer un gran trabajo es amar lo que haces. — Steve Jobs",
+            "Saber que no sabes nada es la verdadera sabiduría. — Sócrates",
+            "La disciplina es el puente entre metas y logros. — Jim Rohn",
+            "Quien tiene un porqué puede soportar cualquier cómo. — Viktor Frankl",
+            "Somos lo que hacemos de forma repetida. La excelencia no es un acto, sino un hábito. — Aristóteles",
+            "La mejor forma de predecir el futuro es creándolo. — Peter Drucker",
+            "No te detengas cuando estés cansado. Detente cuando hayas terminado. — David Goggins",
+            "La calma es el poder. La paciencia es la clave. — Proverbio",
+            "Vence al que se vence a sí mismo. — Buda",
+            "Lo que hacemos en la vida tiene su eco en la eternidad. — Marco Aurelio",
+            "Tu tiempo es limitado, no lo malgastes viviendo la vida de otro. — Steve Jobs",
+            "La mente que se abre a una nueva idea jamás vuelve a su tamaño original. — Einstein",
+            "La vida es lo que sucede mientras estás ocupado haciendo otros planes. — John Lennon",
+            "No busques que los eventos sucedan como quieres, sino quiérelos como suceden. — Epicteto",
+            "Aquel que domina su mente, lo domina todo. — Kalidasa",
+            "El éxito no es el final, el fracaso no es fatal: es el valor para continuar lo que cuenta. — Churchill",
+            "Si quieres algo que nunca tuviste, debes hacer algo que nunca hiciste. — Thomas Jefferson"
             "La sencillez es la máxima sofisticación. — Da Vinci",
             "No es que tengamos poco tiempo, sino que perdemos mucho. — Séneca",
             "La felicidad depende de la calidad de tus pensamientos. — Marco Aurelio",
@@ -136,6 +161,7 @@
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
             
             geometry = new THREE.BufferGeometry();
@@ -143,15 +169,17 @@
             for(let i=0; i<pCount; i++) randomOffsets[i] = Math.random() * Math.PI * 2;
             
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial({ size: 0.018, color: 0x00FFC3, transparent: true, opacity: 0.65 });
-            points = new THREE.Points(geometry, material);
+            points = new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.018, color: 0x00FFC3, transparent: true, opacity: 0.6 }));
             scene.add(points);
             camera.position.z = 5;
 
-            window.addEventListener('mousemove', (e) => {
-                targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
-                targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            });
+            const updateCoords = (x, y) => {
+                targetX = (x / window.innerWidth) * 2 - 1;
+                targetY = -(y / window.innerHeight) * 2 + 1;
+            };
+
+            window.addEventListener('mousemove', e => updateCoords(e.clientX, e.clientY));
+            window.addEventListener('touchmove', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
 
             renderLoop();
             displayQuote();
@@ -160,46 +188,35 @@
         function renderLoop() {
             requestAnimationFrame(renderLoop);
             const time = Date.now() * 0.001;
-            mouseX += (targetMouseX * 4.5 - mouseX) * 0.07;
-            mouseY += (targetMouseY * 4.5 - mouseY) * 0.07;
+            mouseX += (targetX * 4 - mouseX) * 0.06;
+            mouseY += (targetY * 4 - mouseY) * 0.06;
             const pos = geometry.attributes.position.array;
 
             for(let i=0; i<pCount; i++) {
                 const i3 = i * 3, r = i / pCount, a = r * Math.PI * 2;
-                const offset = randomOffsets[i];
+                const jitter = Math.sin(time + randomOffsets[i]) * 0.03;
                 let x, y, z;
 
-                // Micro-movimiento dinámico único por partícula
-                const jitter = Math.sin(time + offset) * 0.02;
-
                 if(vMode === 'breath') {
-                    const breath = (Math.sin(time * 0.7) + 1) / 2;
-                    const bR = 1.6 + (breath * 2.4);
-                    x = Math.cos(a) * bR + jitter; y = Math.sin(a) * bR + jitter; z = Math.sin(a * 3 + time) * 0.4;
+                    const b = (Math.sin(time * 0.6) + 1) / 2;
+                    const bR = 1.7 + (b * 2.3);
+                    x = Math.cos(a) * bR + jitter; y = Math.sin(a) * bR + jitter; z = Math.sin(a * 2 + time) * 0.3;
                 } else if(vMode === 'dna') {
-                    const h = (r - 0.5) * 9; const s = i % 2 === 0 ? 1 : -1;
-                    x = Math.cos(h + time) * s * 1.5 + jitter; y = h; z = Math.sin(h + time) * s * 1.5;
+                    const h = (r - 0.5) * 10; const s = i % 2 === 0 ? 1 : -1;
+                    x = Math.cos(h + time) * s * 1.4 + jitter; y = h; z = Math.sin(h + time) * s * 1.4;
                 } else if(vMode === 'pulse') {
-                    const s = 2.4 + Math.sin(time * 2 + r * 10) * 0.7; x = Math.cos(a) * s + jitter; y = Math.sin(a) * s + jitter; z = Math.sin(time + r * 5);
-                } else if(vMode === 'chaos') {
-                    x = Math.sin(a * time * 0.08) * (2.4 + Math.cos(time + i)) + jitter;
-                    y = Math.cos(a * time * 0.08) * (2.4 + Math.sin(time + i)) + jitter; z = Math.sin(time * r);
-                } else if(vMode === 'cinema') {
-                    x = (r - 0.5) * 12; y = Math.sin(x + time) * 2.3 * Math.cos(x * 0.4) + jitter; z = Math.sin(time * 0.5 + x) * 2.3;
-                } else if(vMode === 'hydro') {
-                    const fA = a + Math.sin(time + r * 5) * 0.4; const fR = 2.6 + Math.cos(time * 0.5 + r * 8) * 0.3;
-                    x = Math.cos(fA) * fR + jitter; y = Math.sin(fA) * fR + jitter; z = Math.sin(time + i * 0.01) * 3;
+                    const s = 2.5 + Math.sin(time * 2 + r * 8) * 0.6;
+                    x = Math.cos(a) * s + jitter; y = Math.sin(a) * s + jitter; z = Math.sin(time + r * 4);
                 } else { // VORTEX
-                    const d = (i % 120) * 0.045; x = Math.cos(a + time + d) * d + jitter; y = Math.sin(a + time + d) * d + jitter; z = (i / 120) - 15;
+                    const d = (i % 120) * 0.045;
+                    x = Math.cos(a + time + d) * d + jitter; y = Math.sin(a + time + d) * d + jitter; z = (i / 120) - 15;
                 }
 
-                // Interacción de repulsión elegante
-                const dx = x - mouseX, dy = y - mouseY, dist = Math.sqrt(dx*dx + dy*dy);
-                const force = Math.max(0, 1.4 - dist);
-                pos[i3] = x + (dx / dist) * force * 0.7; pos[i3+1] = y + (dy / dist) * force * 0.7; pos[i3+2] = z;
+                const dx = x - mouseX, dy = y - mouseY, dist = Math.max(Math.sqrt(dx*dx + dy*dy), 0.1);
+                const force = Math.max(0, 1.3 - dist);
+                pos[i3] = x + (dx / dist) * force * 0.6; pos[i3+1] = y + (dy / dist) * force * 0.6; pos[i3+2] = z;
             }
             geometry.attributes.position.needsUpdate = true;
-            points.rotation.y += 0.0004;
             renderer.render(scene, camera);
         }
 
@@ -211,56 +228,59 @@
             setTimeout(() => {
                 el.innerText = quotes[Math.floor(Math.random() * quotes.length)];
                 el.classList.add('visible');
-            }, 1200);
+            }, 1000);
         }
 
         function handleStart() {
             const btn = document.getElementById('startBtn');
-            if(isRunning) { clearInterval(timerInterval); btn.innerText = "Resume Session"; isRunning = false; }
+            if(isRunning) { clearInterval(timerInterval); btn.innerText = "Start"; isRunning = false; }
             else {
                 isRunning = true; btn.innerText = "Pause";
                 displayQuote();
                 timerInterval = setInterval(() => {
                     timeLeft--;
                     if(timeLeft === 0) { 
-                        const f = document.getElementById('flash'); f.style.opacity = "0.5"; 
-                        setTimeout(() => f.style.opacity = "0", 400); 
+                        document.getElementById('flash').style.opacity = "0.4"; 
+                        setTimeout(() => document.getElementById('flash').style.opacity = "0", 400); 
                     }
-                    if(timeLeft < 0) document.getElementById('timer').classList.add('overtime');
                     updateDisplay();
                 }, 1000);
             }
         }
 
         function updateDisplay() {
-            const absTime = Math.abs(timeLeft); const m = Math.floor(absTime / 60), s = absTime % 60;
-            document.getElementById('timer').innerText = `${timeLeft < 0 ? "-" : ""}${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        }
-
-        function handleTime(m, el) {
-            clearInterval(timerInterval); isRunning = false; timeLeft = m * 60;
-            document.getElementById('timer').classList.remove('overtime');
-            updateDisplay(); document.getElementById('startBtn').innerText = "Start Session";
-            document.querySelectorAll('.t-opt').forEach(b => b.classList.remove('active')); el.classList.add('active');
-        }
-
-        function setVisual(mode, el) {
-            vMode = mode; document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('active')); el.classList.add('active');
-            const colors = {breath: 0x00FFC3, dna: 0xFF3B30, pulse: 0x34C759, chaos: 0xAF52DE, cinema: 0xFF9500, hydro: 0x5AC8FA, vortex: 0x007AFF};
-            points.material.color.setHex(colors[mode]);
+            const absTime = Math.abs(timeLeft);
+            document.getElementById('timer').innerText = `${timeLeft < 0 ? "-" : ""}${Math.floor(absTime / 60).toString().padStart(2,'0')}:${(absTime % 60).toString().padStart(2,'0')}`;
         }
 
         function togglePanel(side) {
             const p = document.getElementById(side === 'left' ? 'panel-left' : 'panel-right');
-            const isCol = p.classList.toggle(side === 'left' ? 'collapsed-left' : 'collapsed-right');
-            document.getElementById(side === 'left' ? 'toggle-left' : 'toggle-right').innerText = isCol ? (side === 'left' ? '›' : '‹') : (side === 'left' ? '‹' : '›');
+            if (window.innerWidth < 768) p.classList.toggle('active-mob');
+            else p.classList.toggle(side === 'left' ? 'collapsed-left' : 'collapsed-right');
+        }
+
+        function handleTime(m, el) {
+            clearInterval(timerInterval); isRunning = false; timeLeft = m * 60;
+            updateDisplay(); document.getElementById('startBtn').innerText = "Start";
+            document.querySelectorAll('.t-opt').forEach(b => b.classList.remove('active')); el.classList.add('active');
+        }
+
+        function setVisual(m, el) { 
+            vMode = m; 
+            document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('active')); el.classList.add('active');
+            const colors = {breath: 0x00FFC3, dna: 0xFF3B30, pulse: 0x34C759, vortex: 0x007AFF};
+            points.material.color.setHex(colors[m]);
         }
 
         function toggleTheme() { document.body.classList.toggle('theme-dia'); }
         function handleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
 
         window.onload = initScene;
-        window.onresize = () => { renderer.setSize(window.innerWidth, window.innerHeight); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); };
+        window.onresize = () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        };
     </script>
 </body>
 </html>
