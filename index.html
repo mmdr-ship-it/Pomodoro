@@ -3,173 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenDoro | Adaptativo Pro</title>
+    <title>ZenDoro Studio | Nature</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <style>
         :root {
-            --bg: #0d0d0d;
-            --text: #ffffff;
-            --accent: #ffffff;
-            --dim: rgba(255, 255, 255, 0.3);
-            --orb-opacity: 0.6;
-            --orb-blur: 60px;
+            --bg: #000000; --text: #ffffff; --accent: #ffffff;
+            --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15);
         }
 
-        /* TEMAS ADAPTATIVOS */
-        body.theme-noche { --bg: #050505; --accent: #ffffff; --text: #ffffff; }
-        body.theme-amanecer { --bg: #1a1410; --accent: #ff8c5a; --text: #ffe0d0; }
-        body.theme-tarde { --bg: #16101d; --accent: #bd93f9; --text: #f8f8f2; }
-        body.theme-dia { --bg: #ffffff; --accent: #007aff; --text: #1d1d1f; --dim: rgba(0,0,0,0.2); --orb-opacity: 0.3; }
+        /* TEMAS APPLE ATMOSPHERE */
+        body.theme-noche { --bg: #050505; --accent: #ffffff; }
+        body.theme-dia { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; --glass: rgba(0,0,0,0.03); --border: rgba(0,0,0,0.1); }
+        body.theme-nublado { --bg: #3a3d42; --accent: #d1d5db; --text: #f9fafb; }
+        body.theme-lluvia { --bg: #1e293b; --accent: #60a5fa; --text: #e0e7ff; }
+        body.theme-amanecer { --bg: #1a1410; --accent: #ff8c5a; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body {
             background-color: var(--bg); color: var(--text);
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             height: 100vh; display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
+            transition: background 2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
         }
 
-        /* --- SISTEMA VISUAL MEJORADO --- */
-        .orb-wrapper { position: absolute; z-index: -1; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        
+        .visual-container { position: absolute; z-index: -1; display: flex; justify-content: center; align-items: center; }
         .orb { 
             width: 320px; height: 320px; border-radius: 50%; 
-            transition: all 0.8s ease; 
-            animation: breathe 10s infinite ease-in-out;
+            transition: all 1.2s ease; animation: breathe 10s infinite ease-in-out; 
         }
 
-        /* MODO 1: NEBLINA 3D (Adaptativa) */
-        .mode-flujo { 
-            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-            filter: blur(var(--orb-blur));
-            opacity: var(--orb-opacity);
-        }
-        
-        /* MODO 2: CÍRCULO PACÍFICO (Borde 3D Brillante) */
-        .mode-circulo { 
-            border: 3px solid var(--accent);
-            box-shadow: 0 0 40px var(--accent), inset 0 0 20px var(--accent);
-            filter: blur(1px);
-            opacity: 0.5;
-        }
-
-        /* MODO 3: ESPICULADO 3D (Efecto Corona) */
-        .mode-espiculado {
-            border: 5px dotted var(--accent);
-            box-shadow: 0 0 60px var(--accent);
-            filter: drop-shadow(0 0 15px var(--accent));
-            opacity: 0.7;
-            animation: breathe 10s infinite ease-in-out, rotate 25s linear infinite;
-        }
+        .mode-neblina { background: radial-gradient(circle, var(--accent) 0%, transparent 70%); filter: blur(70px); opacity: 0.4; }
+        .mode-anillo { border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255,255,255,0.1); opacity: 0.6; }
 
         @keyframes breathe {
-            0%, 100% { transform: scale(0.95); opacity: calc(var(--orb-opacity) * 0.6); }
-            50% { transform: scale(1.6); opacity: var(--orb-opacity); }
+            0%, 100% { transform: scale(0.95); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0.6; }
         }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- INTERFAZ --- */
-        .container { text-align: center; z-index: 10; width: 100%; max-width: 600px; }
-        #timer { font-size: clamp(6rem, 22vw, 11rem); font-weight: 100; letter-spacing: -6px; line-height: 0.9; margin-bottom: 20px; }
-        .estoicismo { font-size: 0.75rem; color: var(--dim); margin: 30px auto; letter-spacing: 2px; text-transform: uppercase; padding: 0 20px; transition: 1s; min-height: 40px;}
+        .ui-content { text-align: center; z-index: 10; width: 90%; max-width: 500px; }
+        #timer { font-size: 8rem; font-weight: 200; letter-spacing: -5px; line-height: 1; margin-bottom: 20px; font-variant-numeric: tabular-nums; }
+        .quote-box { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin: 30px 0; min-height: 40px; }
         
-        .panel { display: flex; gap: 12px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
-        
+        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
         button, select {
-            background: rgba(128,128,128,0.1); border: 1px solid var(--dim);
-            color: var(--text); padding: 8px 16px; border-radius: 20px;
-            cursor: pointer; font-size: 0.7rem; text-transform: uppercase; backdrop-filter: blur(5px);
+            background: var(--glass); border: 1px solid var(--border); color: var(--text);
+            padding: 10px 16px; border-radius: 14px; font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(12px); transition: 0.3s;
         }
-        button.active { border-color: var(--accent); background: rgba(255,255,255,0.1); }
-        .main-toggle { font-size: 1.8rem; border: none; margin-top: 40px; font-weight: 200; background: none; opacity: 0.6; cursor: pointer; color: var(--text); }
-        .main-toggle:hover { opacity: 1; letter-spacing: 4px; }
+        button.active { background: var(--text); color: var(--bg); border: none; }
+        .start-btn { font-size: 1.3rem; background: none; border: none; margin-top: 40px; font-weight: 200; letter-spacing: 5px; cursor: pointer; color: var(--text); opacity: 0.6; }
+        .start-btn:hover { opacity: 1; }
 
-        .session-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); transition: 0.5s; }
-        .dot.filled { background: var(--accent); box-shadow: 0 0 15px var(--accent); transform: scale(1.3); }
+        .dot-box { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+        .dot.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
     </style>
 </head>
 <body class="theme-noche">
 
-    <div class="orb-wrapper"><div id="visualOrb" class="orb mode-flujo"></div></div>
+    <div class="visual-container"><div id="orb" class="orb mode-neblina"></div></div>
 
-    <div class="container">
-        <div id="sessionDots" class="session-dots"></div>
+    <div class="ui-content">
+        <div id="sessionDots" class="dot-box"></div>
         <div id="timer">25:00</div>
-        <div id="quote" class="estoicismo">"La felicidad es un flujo de vida tranquilo."</div>
+        <div id="quote" class="quote-box">Respiración profunda. Enfoque puro.</div>
 
-        <div class="panel">
+        <div class="controls">
             <button onclick="setT(25)" class="active">25</button>
             <button onclick="setT(50)">50</button>
             <button onclick="setT(90)">90</button>
             <button onclick="setT(5)">Rest</button>
         </div>
 
-        <div class="panel">
-            <select id="noiseSelect">
+        <div class="controls">
+            <select id="audioSelect" onchange="changeAudio()">
                 <option value="none">🔇 Silencio</option>
-                <option value="white">🌫️ Ruido Blanco</option>
-                <option value="pink">🌊 Sonido Mar</option>
+                <option value="lluvia">🌧️ Lluvia Pacífica</option>
+                <option value="mar">🌊 Mar Profundo</option>
+                <option value="naturaleza">🍃 Naturaleza</option>
+                <option value="zen">🧘 Sonido Zen</option>
+                <option value="ruido">🌫️ Ruido Blanco</option>
             </select>
-            
             <select onchange="document.body.className = 'theme-' + this.value">
-                <option value="noche">🌙 Noche</option>
-                <option value="amanecer">🌅 Amanecer</option>
-                <option value="tarde">🌇 Tarde</option>
-                <option value="dia">☀️ Día</option>
+                <option value="noche">Midnight</option>
+                <option value="dia">Studio Light</option>
+                <option value="nublado">Cloudy Gray</option>
+                <option value="lluvia">Rainy Blue</option>
+                <option value="amanecer">Sunrise</option>
             </select>
-
-            <button onclick="toggleVisual()">🌀 Cambiar Visual</button>
+            <button onclick="toggleVisual()">Visual</button>
         </div>
 
-        <button class="main-toggle" id="startBtn" onclick="toggle()">START</button>
+        <button class="start-btn" id="startBtn" onclick="toggle()">START</button>
     </div>
 
     <script>
         let timeLeft = 25 * 60, timerId = null, isRunning = false;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let noiseSource = null;
+        let activeSound = null;
 
-        function playNoise(type) {
-            if (noiseSource) noiseSource.stop();
-            const bufferSize = audioCtx.sampleRate * 2,
-                  buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
-                  data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-            noiseSource = audioCtx.createBufferSource();
-            noiseSource.buffer = buffer; noiseSource.loop = true;
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = (type === 'white') ? 'lowpass' : 'bandpass';
-            filter.frequency.value = (type === 'white') ? 800 : 400;
-            const gain = audioCtx.createGain(); gain.gain.value = 0.04;
-            noiseSource.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-            noiseSource.start();
+        const sounds = {
+            lluvia: 'https://assets.mixkit.co/active_storage/sfx/2520/2520-preview.mp3', // Lluvia suave
+            mar: 'https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3',
+            naturaleza: 'https://www.soundjay.com/nature/sounds/forest-1.mp3',
+            zen: 'https://assets.mixkit.co/active_storage/sfx/1074/1074-preview.mp3', // Campana/cuenco
+            ruido: 'https://www.soundjay.com/misc/sounds/white-noise-1.mp3',
+            bell: 'https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3'
+        };
+
+        function changeAudio() {
+            if (activeSound) activeSound.stop();
+            const val = document.getElementById('audioSelect').value;
+            if (val !== 'none' && isRunning) {
+                activeSound = new Howl({ src: [sounds[val]], loop: true, volume: 0.5 });
+                activeSound.play();
+            }
         }
-
-        function playBell() {
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 3);
-            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 4);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 4);
-        }
-
-        const visualModes = ['mode-flujo', 'mode-circulo', 'mode-espiculado'];
-        let currentModeIdx = 0;
 
         function toggleVisual() {
-            const orb = document.getElementById('visualOrb');
-            orb.classList.remove(...visualModes);
-            currentModeIdx = (currentModeIdx + 1) % visualModes.length;
-            orb.classList.add(visualModes[currentModeIdx]);
+            const orb = document.getElementById('orb');
+            orb.classList.toggle('mode-neblina');
+            orb.classList.toggle('mode-anillo');
         }
 
         function setT(m) {
             clearInterval(timerId); isRunning = false;
             timeLeft = m * 60; updateDisp();
-            document.querySelectorAll('.panel button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById('startBtn').innerText = "START";
         }
@@ -180,16 +140,18 @@
         }
 
         function toggle() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
             if(isRunning) {
-                clearInterval(timerId); if (noiseSource) noiseSource.stop();
+                clearInterval(timerId); if (activeSound) activeSound.pause();
                 document.getElementById('startBtn').innerText = "RESUME";
             } else {
-                const noiseType = document.getElementById('noiseSelect').value;
-                if(noiseType !== 'none') playNoise(noiseType);
+                changeAudio();
                 timerId = setInterval(() => {
                     timeLeft--; updateDisp();
-                    if(timeLeft <= 0) { clearInterval(timerId); playBell(); document.getElementById('sessionDots').innerHTML += '<div class="dot filled"></div>'; }
+                    if(timeLeft <= 0) { 
+                        clearInterval(timerId); 
+                        new Howl({ src: [sounds.bell] }).play();
+                        document.getElementById('sessionDots').innerHTML += '<div class="dot active"></div>';
+                    }
                 }, 1000);
                 document.getElementById('startBtn').innerText = "PAUSE";
             }
