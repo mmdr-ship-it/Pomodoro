@@ -3,116 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenDoro | Deep Work</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <title>ZenDoro | Adaptativo Pro</title>
     <style>
         :root {
-            --bg: #121212; /* Un gris muy oscuro en lugar de negro total */
+            --bg: #0d0d0d;
             --text: #ffffff;
-            --accent: rgba(255, 255, 255, 0.9);
-            --dim: rgba(255, 255, 255, 0.4);
-            --orb-color: rgba(255, 255, 255, 0.15);
+            --accent: #ffffff;
+            --dim: rgba(255, 255, 255, 0.3);
+            --orb-opacity: 0.6;
+            --orb-blur: 60px;
         }
 
-        /* Temas con más brillo para que no sean "agujeros negros" */
-        body.theme-noche { --bg: #0d0d0d; --orb-color: rgba(255, 255, 255, 0.1); }
-        body.theme-amanecer { --bg: #161b22; --orb-color: rgba(255, 120, 80, 0.2); --text: #ffe0d0; }
-        body.theme-tarde { --bg: #1d1610; --orb-color: rgba(255, 180, 50, 0.2); --text: #ffefd5; }
-        body.theme-dia { --bg: #ffffff; --text: #1a1a1a; --dim: rgba(0,0,0,0.3); --orb-color: rgba(0,0,0,0.08); }
+        /* TEMAS ADAPTATIVOS */
+        body.theme-noche { --bg: #050505; --accent: #ffffff; --text: #ffffff; }
+        body.theme-amanecer { --bg: #1a1410; --accent: #ff8c5a; --text: #ffe0d0; }
+        body.theme-tarde { --bg: #16101d; --accent: #bd93f9; --text: #f8f8f2; }
+        body.theme-dia { --bg: #ffffff; --accent: #007aff; --text: #1d1d1f; --dim: rgba(0,0,0,0.2); --orb-opacity: 0.3; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg); color: var(--text);
             font-family: 'Inter', -apple-system, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: background-color 2s ease, color 1s ease;
-            overflow: hidden;
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
         }
 
-        /* SISTEMA DE RESPIRACIÓN */
-        .orb-wrapper {
-            position: absolute;
-            z-index: -1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* --- SISTEMA VISUAL MEJORADO --- */
+        .orb-wrapper { position: absolute; z-index: -1; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        
+        .orb { 
+            width: 320px; height: 320px; border-radius: 50%; 
+            transition: all 0.8s ease; 
+            animation: breathe 10s infinite ease-in-out;
         }
 
-        .orb {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: var(--orb-color);
-            transition: all 1s ease;
+        /* MODO 1: NEBLINA 3D (Adaptativa) */
+        .mode-flujo { 
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            filter: blur(var(--orb-blur));
+            opacity: var(--orb-opacity);
+        }
+        
+        /* MODO 2: CÍRCULO PACÍFICO (Borde 3D Brillante) */
+        .mode-circulo { 
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 40px var(--accent), inset 0 0 20px var(--accent);
+            filter: blur(1px);
+            opacity: 0.5;
         }
 
-        /* Modo Círculo: Bordes definidos */
-        .mode-circulo { border: 2px solid var(--dim); filter: blur(0px); }
-        /* Modo Flujo: Neblina 3D */
-        .mode-flujo { border: none; filter: blur(60px); }
-
-        .anim-breathe { animation: breathe 10s infinite ease-in-out; }
+        /* MODO 3: ESPICULADO 3D (Efecto Corona) */
+        .mode-espiculado {
+            border: 5px dotted var(--accent);
+            box-shadow: 0 0 60px var(--accent);
+            filter: drop-shadow(0 0 15px var(--accent));
+            opacity: 0.7;
+            animation: breathe 10s infinite ease-in-out, rotate 25s linear infinite;
+        }
 
         @keyframes breathe {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.7); opacity: 0.8; }
+            0%, 100% { transform: scale(0.95); opacity: calc(var(--orb-opacity) * 0.6); }
+            50% { transform: scale(1.6); opacity: var(--orb-opacity); }
         }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .container { text-align: center; z-index: 10; width: 100%; }
+        /* --- INTERFAZ --- */
+        .container { text-align: center; z-index: 10; width: 100%; max-width: 600px; }
+        #timer { font-size: clamp(6rem, 22vw, 11rem); font-weight: 100; letter-spacing: -6px; line-height: 0.9; margin-bottom: 20px; }
+        .estoicismo { font-size: 0.75rem; color: var(--dim); margin: 30px auto; letter-spacing: 2px; text-transform: uppercase; padding: 0 20px; transition: 1s; min-height: 40px;}
         
-        #timer {
-            font-size: clamp(5rem, 18vw, 9rem);
-            font-weight: 100;
-            letter-spacing: -4px;
-            margin-bottom: 10px;
-        }
-
-        .estoicismo {
-            font-size: 0.75rem;
-            color: var(--dim);
-            margin: 20px auto;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            max-width: 80%;
-        }
-
-        .panel { display: flex; gap: 10px; margin: 10px 0; justify-content: center; flex-wrap: wrap; }
-
+        .panel { display: flex; gap: 12px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
+        
         button, select {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--dim);
-            color: var(--text);
-            padding: 6px 12px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 0.65rem;
-            text-transform: uppercase;
+            background: rgba(128,128,128,0.1); border: 1px solid var(--dim);
+            color: var(--text); padding: 8px 16px; border-radius: 20px;
+            cursor: pointer; font-size: 0.7rem; text-transform: uppercase; backdrop-filter: blur(5px);
         }
-        button:hover, button.active { border-color: var(--text); background: rgba(255,255,255,0.1); }
+        button.active { border-color: var(--accent); background: rgba(255,255,255,0.1); }
+        .main-toggle { font-size: 1.8rem; border: none; margin-top: 40px; font-weight: 200; background: none; opacity: 0.6; cursor: pointer; color: var(--text); }
+        .main-toggle:hover { opacity: 1; letter-spacing: 4px; }
 
-        .main-toggle { font-size: 1.5rem; border: none; margin-top: 30px; font-weight: 200; opacity: 0.7; background: none; }
-
-        .session-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
-        .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
-        .dot.filled { background: var(--text); box-shadow: 0 0 8px var(--text); }
+        .session-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); transition: 0.5s; }
+        .dot.filled { background: var(--accent); box-shadow: 0 0 15px var(--accent); transform: scale(1.3); }
     </style>
 </head>
 <body class="theme-noche">
 
-    <div class="orb-wrapper">
-        <div id="visualOrb" class="orb mode-flujo anim-breathe"></div>
-    </div>
+    <div class="orb-wrapper"><div id="visualOrb" class="orb mode-flujo"></div></div>
 
     <div class="container">
         <div id="sessionDots" class="session-dots"></div>
         <div id="timer">25:00</div>
-        <div id="quote" class="estoicismo">"Persiste y resiste."</div>
+        <div id="quote" class="estoicismo">"La felicidad es un flujo de vida tranquilo."</div>
 
         <div class="panel">
             <button onclick="setT(25)" class="active">25</button>
@@ -122,19 +106,17 @@
         </div>
 
         <div class="panel">
-            <select id="ambientSelect" onchange="changeAmbient()">
+            <select id="noiseSelect">
                 <option value="none">🔇 Silencio</option>
-                <option value="rain">🌧️ Lluvia</option>
-                <option value="waves">🌊 Mar</option>
-                <option value="forest">🍃 Bosque</option>
-                <option value="cafe">☕ Café</option>
+                <option value="white">🌫️ Ruido Blanco</option>
+                <option value="pink">🌊 Sonido Mar</option>
             </select>
             
             <select onchange="document.body.className = 'theme-' + this.value">
                 <option value="noche">🌙 Noche</option>
                 <option value="amanecer">🌅 Amanecer</option>
-                <option value="dia">☀️ Día</option>
                 <option value="tarde">🌇 Tarde</option>
+                <option value="dia">☀️ Día</option>
             </select>
 
             <button onclick="toggleVisual()">🌀 Cambiar Visual</button>
@@ -144,82 +126,74 @@
     </div>
 
     <script>
-        let timeLeft = 25 * 60;
-        let timerId = null;
-        let isRunning = false;
-        let ambientSound = null;
+        let timeLeft = 25 * 60, timerId = null, isRunning = false;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let noiseSource = null;
 
-        const quotes = ["No es que tengamos poco tiempo, sino que perdemos mucho.", "La felicidad depende de nosotros mismos.", "Dificultades fortalecen la mente.", "Vivir es luchar."];
+        function playNoise(type) {
+            if (noiseSource) noiseSource.stop();
+            const bufferSize = audioCtx.sampleRate * 2,
+                  buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate),
+                  data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer; noiseSource.loop = true;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = (type === 'white') ? 'lowpass' : 'bandpass';
+            filter.frequency.value = (type === 'white') ? 800 : 400;
+            const gain = audioCtx.createGain(); gain.gain.value = 0.04;
+            noiseSource.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+            noiseSource.start();
+        }
 
-        // URLs de respaldo más estables
-        const soundUrls = {
-            bell: 'https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3',
-            rain: 'https://www.soundjay.com/nature/sounds/rain-01.mp3',
-            waves: 'https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3',
-            forest: 'https://www.soundjay.com/nature/sounds/forest-1.mp3',
-            cafe: 'https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3'
-        };
+        function playBell() {
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 3);
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 4);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 4);
+        }
 
-        let bellSound = new Howl({ src: [soundUrls.bell] });
+        const visualModes = ['mode-flujo', 'mode-circulo', 'mode-espiculado'];
+        let currentModeIdx = 0;
 
         function toggleVisual() {
             const orb = document.getElementById('visualOrb');
-            if(orb.classList.contains('mode-flujo')) {
-                orb.classList.remove('mode-flujo');
-                orb.classList.add('mode-circulo');
-            } else {
-                orb.classList.remove('mode-circulo');
-                orb.classList.add('mode-flujo');
-            }
+            orb.classList.remove(...visualModes);
+            currentModeIdx = (currentModeIdx + 1) % visualModes.length;
+            orb.classList.add(visualModes[currentModeIdx]);
         }
 
         function setT(m) {
             clearInterval(timerId); isRunning = false;
-            timeLeft = m * 60;
-            updateDisp();
+            timeLeft = m * 60; updateDisp();
             document.querySelectorAll('.panel button').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById('startBtn').innerText = "START";
         }
 
         function updateDisp() {
-            let m = Math.floor(timeLeft / 60);
-            let s = timeLeft % 60;
+            let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
             document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }
 
         function toggle() {
-            // Activar contexto de audio (requerido por navegadores)
-            if (Howler.state === 'suspended') Howler.ctx.resume();
-
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             if(isRunning) {
-                clearInterval(timerId);
+                clearInterval(timerId); if (noiseSource) noiseSource.stop();
                 document.getElementById('startBtn').innerText = "RESUME";
             } else {
+                const noiseType = document.getElementById('noiseSelect').value;
+                if(noiseType !== 'none') playNoise(noiseType);
                 timerId = setInterval(() => {
-                    timeLeft--;
-                    updateDisp();
-                    if(timeLeft <= 0) finish();
+                    timeLeft--; updateDisp();
+                    if(timeLeft <= 0) { clearInterval(timerId); playBell(); document.getElementById('sessionDots').innerHTML += '<div class="dot filled"></div>'; }
                 }, 1000);
                 document.getElementById('startBtn').innerText = "PAUSE";
             }
             isRunning = !isRunning;
-        }
-
-        function finish() {
-            clearInterval(timerId);
-            bellSound.play();
-            document.getElementById('sessionDots').innerHTML += '<div class="dot filled"></div>';
-            document.getElementById('startBtn').innerText = "RESTART";
-        }
-
-        function changeAmbient() {
-            if(ambientSound) ambientSound.stop();
-            const val = document.getElementById('ambientSelect').value;
-            if(val !== 'none') {
-                ambientSound = new Howl({ src: [soundUrls[val]], loop: true, volume: 0.3 });
-                ambientSound.play();
-            }
         }
     </script>
 </body>
