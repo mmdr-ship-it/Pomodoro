@@ -3,115 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenDoro Studio | Ultimate Edition</title>
+    <title>ZenDoro Studio Pro | Overtime Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --bg: #000; --text: #fff; --accent: #007AFF;
-            --glass: rgba(30, 30, 30, 0.7); --border: rgba(255, 255, 255, 0.1);
+            --bg: #000; --text: #fff; --accent: #007AFF; --danger: #FF3B30;
+            --glass: rgba(25, 25, 25, 0.7); --border: rgba(255, 255, 255, 0.1);
         }
-        body.theme-dia { --bg: #F5F5F7; --text: #1D1D1F; --glass: rgba(255, 255, 255, 0.8); --border: rgba(0, 0, 0, 0.1); }
-        body.theme-atardecer { --bg: #1a0b16; --accent: #ff2d55; }
+        body.theme-dia { 
+            --bg: #F5F5F7; --text: #1D1D1F; --glass: rgba(255, 255, 255, 0.8); --border: rgba(0, 0, 0, 0.1); 
+            --accent: #0071E3;
+        }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: 1s ease; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: 0.8s; }
         
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
         .ui-wrapper {
             position: relative; z-index: 10; height: 100vh; width: 100%;
-            display: grid; grid-template-columns: 280px 1fr 280px; padding: 30px; gap: 20px;
+            display: flex; justify-content: space-between; padding: 30px; gap: 20px;
         }
 
         .panel { 
             background: var(--glass); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--border); border-radius: 24px; padding: 25px;
+            border: 1px solid var(--border); border-radius: 28px; padding: 25px;
             display: flex; flex-direction: column; gap: 15px; pointer-events: all;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: 280px;
         }
 
-        /* TIMER & FRASES */
-        .center-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #timer { font-size: 8rem; font-weight: 100; letter-spacing: -5px; line-height: 1; margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .panel.collapsed { transform: translateX(-350px); opacity: 0; pointer-events: none; }
+        .panel.collapsed-right { transform: translateX(350px); opacity: 0; pointer-events: none; }
+
+        /* TIMER & OVERTIME */
+        .center-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #timer { font-size: 9rem; font-weight: 100; letter-spacing: -6px; margin: 10px 0; font-variant-numeric: tabular-nums; transition: color 0.3s; }
+        #timer.overtime { color: var(--danger); font-weight: 400; text-shadow: 0 0 20px rgba(255, 59, 48, 0.4); }
         
-        .quote-container { margin: 20px 0; height: 50px; position: relative; width: 100%; }
-        #dynamic-quote { 
-            font-size: 14px; text-transform: uppercase; letter-spacing: 3px; opacity: 0.6;
-            animation: curveFlow 5s infinite ease-in-out; display: inline-block;
-        }
+        #dynamic-quote { font-size: 12px; text-transform: uppercase; letter-spacing: 4px; opacity: 0.5; height: 20px; }
 
-        @keyframes curveFlow {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
-            50% { transform: translateY(-10px) scale(1.05); opacity: 1; }
-        }
-
-        /* BOTONES */
+        /* BUTTONS */
         button {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            color: var(--text); padding: 15px; border-radius: 15px; font-size: 12px;
+            background: rgba(120, 120, 120, 0.1); border: 1px solid var(--border);
+            color: var(--text); padding: 14px; border-radius: 16px; font-size: 11px;
             cursor: pointer; transition: 0.3s; width: 100%; text-align: left;
         }
-        button:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
-        button.active { background: var(--accent) !important; color: #fff !important; border: none; }
+        button:hover { background: rgba(120, 120, 120, 0.2); }
+        button.active { background: var(--accent) !important; color: #fff !important; }
 
         .main-btn { 
-            font-size: 1.5rem; background: var(--text); color: var(--bg); border: none;
+            font-size: 1.2rem; background: var(--text); color: var(--bg); border: none;
             text-align: center; font-weight: 400; letter-spacing: 5px; margin-top: 30px;
-            border-radius: 20px; padding: 20px; width: 300px; cursor: pointer;
+            border-radius: 20px; padding: 18px 60px; width: auto; cursor: pointer;
         }
 
-        .fs-toggle {
-            position: fixed; bottom: 30px; right: 30px; z-index: 100;
-            width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border);
-            background: var(--glass); color: var(--text); cursor: pointer;
+        /* CONTROLES SUTILES */
+        .side-toggle {
+            position: fixed; bottom: 30px; width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--glass); color: var(--text);
+            cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center;
+        }
+        #toggle-left { left: 30px; }
+        #toggle-right { right: 80px; }
+        #toggle-fs { right: 30px; }
+
+        /* FLASH EFFECT */
+        #flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 1000;
         }
     </style>
 </head>
 <body class="theme-noche">
 
+    <div id="flash"></div>
     <div id="canvas-container"></div>
-    <button class="fs-toggle" onclick="handleFS()">⛶</button>
+    
+    <button class="side-toggle" id="toggle-left" onclick="togglePanel('left')">‹</button>
+    <button class="side-toggle" id="toggle-right" onclick="togglePanel('right')">›</button>
+    <button class="side-toggle" id="toggle-fs" onclick="handleFS()">⛶</button>
 
     <main class="ui-wrapper">
-        <aside class="panel">
-            <h3>Visual Atmosphere</h3>
-            <button onclick="setVisual('vortex', this)" class="v-opt active">Vórtice Galáctico</button>
-            <button onclick="setVisual('dna', this)" class="v-opt">Doble Hélice ADN</button>
-            <button onclick="setVisual('pulse', this)" class="v-opt">Pulso de Plasma</button>
-            <button onclick="setVisual('flow', this)" class="v-opt">Flujo Cinemático</button>
-            <button onclick="setVisual('chaos', this)" class="v-opt">Caos Organizado</button>
+        <aside class="panel" id="panel-left">
+            <h3>Visual Studio</h3>
+            <button onclick="setVisual('vortex', this)" class="v-opt active">Vórtice</button>
+            <button onclick="setVisual('dna', this)" class="v-opt">ADN Helix</button>
+            <button onclick="setVisual('pulse', this)" class="v-opt">Pulso</button>
+            <button onclick="setVisual('chaos', this)" class="v-opt">Caos</button>
         </aside>
 
         <section class="center-content">
-            <div class="quote-container">
-                <span id="dynamic-quote">PREPÁRATE PARA FLUIR</span>
-            </div>
+            <span id="dynamic-quote">FOCUS MODE</span>
             <div id="timer">25:00</div>
             <button class="main-btn" id="startBtn" onclick="handleStart()">START</button>
         </section>
 
-        <aside class="panel">
-            <h3>Focus Session</h3>
-            <button onclick="handleTime(25, this)" class="t-opt active">25m Soft Focus</button>
-            <button onclick="handleTime(45, this)" class="t-opt">45m Deep Focus</button>
-            <button onclick="handleTime(90, this)" class="t-opt">90m Ultra Work</button>
-
-            <h3>Rest Mode</h3>
+        <aside class="panel" id="panel-right">
+            <h3>Sesión</h3>
+            <button onclick="handleTime(25, this)" class="t-opt active">25m Work</button>
+            <button onclick="handleTime(45, this)" class="t-opt">45m Focus</button>
+            <button onclick="handleTime(90, this)" class="t-opt">90m Deep</button>
+            <h3>Descanso</h3>
             <div style="display: flex; gap: 5px;">
                 <button onclick="handleTime(5, this)" class="t-opt">5m</button>
                 <button onclick="handleTime(15, this)" class="t-opt">15m</button>
             </div>
-
-            <h3 style="margin-top:10px">Theme</h3>
-            <select onchange="document.body.className='theme-'+this.value" style="width:100%; background:none; color:inherit; padding:10px; border-radius:10px; border:1px solid var(--border);">
-                <option value="noche">Midnight</option>
-                <option value="dia">Studio Light</option>
-                <option value="atardecer">Sunset Pink</option>
-            </select>
+            <h3 style="margin-top:10px">Interfaz</h3>
+            <button onclick="toggleTheme()">Cambiar Tema (D/N)</button>
         </aside>
     </main>
 
     <script>
-        // --- MOTOR 3D ROBUSTO ---
         let scene, camera, renderer, points, geometry;
         let vMode = 'vortex';
         const pCount = 8000;
@@ -126,12 +128,10 @@
             geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(pCount * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
-            const material = new THREE.PointsMaterial({ size: 0.03, color: 0x007AFF, transparent: true, opacity: 0.7 });
+            const material = new THREE.PointsMaterial({ size: 0.03, color: 0x007AFF, transparent: true, opacity: 0.6 });
             points = new THREE.Points(geometry, material);
             scene.add(points);
             camera.position.z = 5;
-            
             renderLoop();
         }
 
@@ -139,36 +139,28 @@
             requestAnimationFrame(renderLoop);
             const time = Date.now() * 0.001;
             const pos = geometry.attributes.position.array;
-
             for(let i=0; i<pCount; i++) {
-                const i3 = i * 3;
-                const r = i / pCount;
-                const angle = r * Math.PI * 2;
-
+                const i3 = i * 3, r = i / pCount, a = r * Math.PI * 2;
                 if(vMode === 'vortex') {
-                    const d = (i % 80) * 0.05;
-                    pos[i3] = Math.cos(angle + time + d) * d;
-                    pos[i3+1] = Math.sin(angle + time + d) * d;
+                    const d = (i % 80) * 0.06;
+                    pos[i3] = Math.cos(a + time + d) * d;
+                    pos[i3+1] = Math.sin(a + time + d) * d;
                     pos[i3+2] = (i / 80) - 20;
                 } else if(vMode === 'dna') {
                     const h = (r - 0.5) * 8;
                     const spiral = i % 2 === 0 ? 1 : -1;
-                    pos[i3] = Math.cos(h + time) * spiral * 1.2;
+                    pos[i3] = Math.cos(h + time) * spiral * 1.5;
                     pos[i3+1] = h;
-                    pos[i3+2] = Math.sin(h + time) * spiral * 1.2;
+                    pos[i3+2] = Math.sin(h + time) * spiral * 1.5;
                 } else if(vMode === 'pulse') {
                     const s = 2 + Math.sin(time * 2 + r * 10) * 0.6;
-                    pos[i3] = Math.cos(angle) * s;
-                    pos[i3+1] = Math.sin(angle) * s;
+                    pos[i3] = Math.cos(a) * s;
+                    pos[i3+1] = Math.sin(a) * s;
                     pos[i3+2] = Math.sin(time + r * 5);
-                } else if(vMode === 'flow') {
-                    pos[i3] = Math.sin(angle * 2) * 2 + Math.sin(time + i);
-                    pos[i3+1] = Math.cos(angle + time) * 2;
-                    pos[i3+2] = Math.cos(time + i) * 0.5;
                 } else {
-                    pos[i3] = (Math.random() - 0.5) * 10 * Math.sin(time + angle);
-                    pos[i3+1] = (Math.random() - 0.5) * 10 * Math.cos(time + angle);
-                    pos[i3+2] = Math.sin(time) * 2;
+                    pos[i3] = Math.sin(a + time) * (3 * r);
+                    pos[i3+1] = Math.cos(a - time) * (3 * r);
+                    pos[i3+2] = Math.tan(r + time) * 0.2;
                 }
             }
             geometry.attributes.position.needsUpdate = true;
@@ -176,16 +168,10 @@
             renderer.render(scene, camera);
         }
 
-        // --- LÓGICA DE LA APP ---
-        let timeLeft = 25 * 60;
-        let isRunning = false;
-        let timerInterval = null;
-        const phrases = ["Enfócate en el ahora", "Respira profundo", "Tu mente es poderosa", "Productividad pura", "Estado de flow"];
+        let timeLeft = 25 * 60, isRunning = false, timerInterval = null, isOvertime = false;
 
         function handleStart() {
             const btn = document.getElementById('startBtn');
-            const quote = document.getElementById('dynamic-quote');
-            
             if(isRunning) {
                 clearInterval(timerInterval);
                 btn.innerText = "RESUME";
@@ -193,30 +179,37 @@
             } else {
                 isRunning = true;
                 btn.innerText = "PAUSE";
-                quote.innerText = phrases[Math.floor(Math.random() * phrases.length)];
                 timerInterval = setInterval(() => {
-                    if(timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        isRunning = false;
-                        btn.innerText = "START";
-                        return;
-                    }
                     timeLeft--;
+                    if(timeLeft === 0) triggerFlash();
+                    if(timeLeft < 0) {
+                        isOvertime = true;
+                        document.getElementById('timer').classList.add('overtime');
+                    }
                     updateDisplay();
                 }, 1000);
             }
         }
 
         function updateDisplay() {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft % 60;
-            document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            const absTime = Math.abs(timeLeft);
+            const m = Math.floor(absTime / 60);
+            const s = absTime % 60;
+            const sign = timeLeft < 0 ? "-" : "";
+            document.getElementById('timer').innerText = `${sign}${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        function triggerFlash() {
+            const f = document.getElementById('flash');
+            f.style.opacity = "0.5";
+            setTimeout(() => f.style.opacity = "0", 200);
         }
 
         function handleTime(m, el) {
             clearInterval(timerInterval);
-            isRunning = false;
+            isRunning = false; isOvertime = false;
             timeLeft = m * 60;
+            document.getElementById('timer').classList.remove('overtime');
             updateDisplay();
             document.getElementById('startBtn').innerText = "START";
             document.querySelectorAll('.t-opt').forEach(b => b.classList.remove('active'));
@@ -227,10 +220,19 @@
             vMode = mode;
             document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
-            
-            // Cambiar color de partículas según el modo para más "dopamina"
-            const colors = {vortex: 0x007AFF, dna: 0xFF2D55, pulse: 0xFFCC00, flow: 0x5856D6, chaos: 0x34C759};
+            const colors = {vortex: 0x007AFF, dna: 0xFF3B30, pulse: 0x34C759, chaos: 0xAF52DE};
             points.material.color.setHex(colors[mode]);
+        }
+
+        function togglePanel(side) {
+            const p = document.getElementById(side === 'left' ? 'panel-left' : 'panel-right');
+            const b = document.getElementById(side === 'left' ? 'toggle-left' : 'toggle-right');
+            const isCol = p.classList.toggle(side === 'left' ? 'collapsed' : 'collapsed-right');
+            b.innerText = isCol ? (side === 'left' ? '›' : '‹') : (side === 'left' ? '‹' : '›');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('theme-dia');
         }
 
         function handleFS() {
@@ -240,9 +242,9 @@
 
         window.onload = initScene;
         window.onresize = () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
         };
     </script>
 </body>
