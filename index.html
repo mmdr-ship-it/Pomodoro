@@ -3,110 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenDoro Studio | Nature</title>
+    <title>ZenDoro Studio | 3D Particles</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --bg: #000000; --text: #ffffff; --accent: #ffffff;
-            --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15);
+            --bg: #050505; --text: #ffffff; --accent: #00d4ff;
+            --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1);
+            --panel-bg: rgba(10, 10, 10, 0.8);
         }
 
-        /* TEMAS APPLE ATMOSPHERE */
-        body.theme-noche { --bg: #050505; --accent: #ffffff; }
-        body.theme-dia { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; --glass: rgba(0,0,0,0.03); --border: rgba(0,0,0,0.1); }
-        body.theme-nublado { --bg: #3a3d42; --accent: #d1d5db; --text: #f9fafb; }
-        body.theme-lluvia { --bg: #1e293b; --accent: #60a5fa; --text: #e0e7ff; }
-        body.theme-amanecer { --bg: #1a1410; --accent: #ff8c5a; }
+        /* TEMAS CON CONTRASTE CORREGIDO */
+        body.theme-noche { --bg: #050505; --accent: #00d4ff; --text: #ffffff; }
+        body.theme-dia { --bg: #f5f5f7; --accent: #0071e3; --text: #1d1d1f; --glass: rgba(0,0,0,0.05); --border: rgba(0,0,0,0.1); --panel-bg: rgba(255, 255, 255, 0.85); }
+        body.theme-atardecer { --bg: #1a0f1a; --accent: #ff4d6d; --text: #ffe0e9; }
+        body.theme-nublado { --bg: #2c3e50; --accent: #bdc3c7; --text: #ecf0f1; }
+        body.theme-lluvia { --bg: #0f172a; --accent: #38bdf8; --text: #f1f5f9; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body {
             background-color: var(--bg); color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            transition: background 2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
+            height: 100vh; overflow: hidden; transition: background 2s;
         }
 
-        .visual-container { position: absolute; z-index: -1; display: flex; justify-content: center; align-items: center; }
-        .orb { 
-            width: 320px; height: 320px; border-radius: 50%; 
-            transition: all 1.2s ease; animation: breathe 10s infinite ease-in-out; 
+        /* FONDO 3D */
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        /* LAYOUT PRINCIPAL (ESTILO IMAGEN) */
+        .app-container {
+            position: relative; z-index: 10; height: 100vh; width: 100%;
+            display: grid; grid-template-columns: 280px 1fr 300px; padding: 20px; gap: 20px;
         }
 
-        .mode-neblina { background: radial-gradient(circle, var(--accent) 0%, transparent 70%); filter: blur(70px); opacity: 0.4; }
-        .mode-anillo { border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255,255,255,0.1); opacity: 0.6; }
-
-        @keyframes breathe {
-            0%, 100% { transform: scale(0.95); opacity: 0.3; }
-            50% { transform: scale(1.5); opacity: 0.6; }
+        .panel {
+            background: var(--panel-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 25px; display: flex; flex-direction: column; gap: 20px;
         }
 
-        .ui-content { text-align: center; z-index: 10; width: 90%; max-width: 500px; }
-        #timer { font-size: 8rem; font-weight: 200; letter-spacing: -5px; line-height: 1; margin-bottom: 20px; font-variant-numeric: tabular-nums; }
-        .quote-box { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin: 30px 0; min-height: 40px; }
-        
-        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+        h3 { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.6; margin-bottom: 10px; }
+
+        /* PANEL CENTRAL */
+        .main-display { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #timer { font-size: 9rem; font-weight: 200; letter-spacing: -6px; line-height: 1; margin: 20px 0; font-variant-numeric: tabular-nums; }
+        .quote-box { font-size: 0.85rem; opacity: 0.7; max-width: 80%; height: 40px; }
+
+        /* BOTONES Y CONTROLES */
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
         button, select {
             background: var(--glass); border: 1px solid var(--border); color: var(--text);
-            padding: 10px 16px; border-radius: 14px; font-size: 0.65rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(12px); transition: 0.3s;
+            padding: 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; width: 100%;
+            text-align: left;
         }
-        button.active { background: var(--text); color: var(--bg); border: none; }
-        .start-btn { font-size: 1.3rem; background: none; border: none; margin-top: 40px; font-weight: 200; letter-spacing: 5px; cursor: pointer; color: var(--text); opacity: 0.6; }
-        .start-btn:hover { opacity: 1; }
+        button:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
+        button.active { border-left: 4px solid var(--accent); background: rgba(255,255,255,0.1); }
 
-        .dot-box { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+        .start-btn {
+            font-size: 1.5rem; background: var(--accent); color: white;
+            border: none; text-align: center; font-weight: 300; letter-spacing: 5px; margin-top: 20px;
+        }
+        body.theme-dia .start-btn { color: white; }
+
+        .dot-box { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--accent); }
         .dot.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .app-container { grid-template-columns: 1fr; overflow-y: auto; }
+            .panel:not(.main-display) { display: none; }
+        }
     </style>
 </head>
 <body class="theme-noche">
 
-    <div class="visual-container"><div id="orb" class="orb mode-neblina"></div></div>
+    <div id="canvas-container"></div>
 
-    <div class="ui-content">
-        <div id="sessionDots" class="dot-box"></div>
-        <div id="timer">25:00</div>
-        <div id="quote" class="quote-box">Respiración profunda. Enfoque puro.</div>
+    <main class="app-container">
+        <aside class="panel">
+            <h3>Modos Visuales</h3>
+            <div class="control-group">
+                <button onclick="changeVisual(0)" class="active">Audio Reactivo 3D</button>
+                <button onclick="changeVisual(1)">Flujo Neblina</button>
+                <button onclick="changeVisual(2)">Anillo Energético</button>
+            </div>
+            <div style="margin-top: auto;">
+                <h3>Sesiones</h3>
+                <div id="sessionDots" class="dot-box"></div>
+            </div>
+        </aside>
 
-        <div class="controls">
-            <button onclick="setT(25)" class="active">25</button>
-            <button onclick="setT(50)">50</button>
-            <button onclick="setT(90)">90</button>
-            <button onclick="setT(5)">Rest</button>
-        </div>
+        <section class="main-display">
+            <div id="timer">25:00</div>
+            <div id="quote" class="quote-box">"Tu mente es el taller de tu realidad."</div>
+            <div style="display: flex; gap: 15px; margin-top: 30px; width: 300px;">
+                <button class="start-btn" id="startBtn" onclick="toggle()" style="text-align: center;">START</button>
+            </div>
+        </section>
 
-        <div class="controls">
-            <select id="audioSelect" onchange="changeAudio()">
-                <option value="none">🔇 Silencio</option>
-                <option value="lluvia">🌧️ Lluvia Pacífica</option>
-                <option value="mar">🌊 Mar Profundo</option>
-                <option value="naturaleza">🍃 Naturaleza</option>
-                <option value="zen">🧘 Sonido Zen</option>
-                <option value="ruido">🌫️ Ruido Blanco</option>
-            </select>
-            <select onchange="document.body.className = 'theme-' + this.value">
-                <option value="noche">Midnight</option>
-                <option value="dia">Studio Light</option>
-                <option value="nublado">Cloudy Gray</option>
-                <option value="lluvia">Rainy Blue</option>
-                <option value="amanecer">Sunrise</option>
-            </select>
-            <button onclick="toggleVisual()">Visual</button>
-        </div>
+        <aside class="panel">
+            <h3>Tiempo (Minutos)</h3>
+            <div class="control-group">
+                <button onclick="setT(25)" id="btn-25" class="active">25:00 Focus</button>
+                <button onclick="setT(50)" id="btn-50">50:00 Deep Work</button>
+                <button onclick="setT(5)" id="btn-5">05:00 Descanso</button>
+            </div>
 
-        <button class="start-btn" id="startBtn" onclick="toggle()">START</button>
-    </div>
+            <h3>Atmósfera</h3>
+            <div class="control-group">
+                <select id="audioSelect" onchange="changeAudio()">
+                    <option value="none">🔇 Sin Sonido</option>
+                    <option value="lluvia">🌧️ Lluvia Nítida</option>
+                    <option value="mar">🌊 Mar Real</option>
+                    <option value="naturaleza">🍃 Naturaleza Zen</option>
+                    <option value="ruido">🌫️ Ruido Blanco</option>
+                </select>
+                <select onchange="updateTheme(this.value)">
+                    <option value="noche">Midnight Mode</option>
+                    <option value="dia">Studio Light</option>
+                    <option value="atardecer">Twilight Sunset</option>
+                    <option value="nublado">Cloudy Gray</option>
+                    <option value="lluvia">Rainy Blue</option>
+                </select>
+            </div>
+        </aside>
+    </main>
 
     <script>
-        let timeLeft = 25 * 60, timerId = null, isRunning = false;
-        let activeSound = null;
+        // --- MOTOR 3D (THREE.JS) ---
+        let scene, camera, renderer, particles, particleSystem;
+        let particleCount = 4000;
+        
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
 
+            particles = new THREE.BufferGeometry();
+            let positions = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount; i++) {
+                let angle = (i / particleCount) * Math.PI * 2;
+                let radius = 3 + Math.random() * 0.5;
+                positions[i * 3] = Math.cos(angle) * radius;
+                positions[i * 3 + 1] = Math.sin(angle) * radius;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
+            }
+
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            let material = new THREE.PointsMaterial({
+                size: 0.03,
+                color: 0x00d4ff,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem = new THREE.Points(particles, material);
+            scene.add(particleSystem);
+            camera.position.z = 8;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            let time = Date.now() * 0.001;
+            let positions = particles.attributes.position.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                let i3 = i * 3;
+                let angle = (i / particleCount) * Math.PI * 2;
+                // Movimiento dinámico inspirado en la imagen
+                let wave = Math.sin(time + angle * 5) * 0.2;
+                let breath = isRunning ? Math.sin(time * 0.8) * 0.5 : 0;
+                
+                let r = (3 + wave + breath);
+                positions[i3] = Math.cos(angle) * r;
+                positions[i3 + 1] = Math.sin(angle) * r;
+            }
+            particles.attributes.position.needsUpdate = true;
+            particleSystem.rotation.z += 0.001;
+            renderer.render(scene, camera);
+        }
+
+        // --- LÓGICA POMODORO & AUDIO ---
+        let timeLeft = 25 * 60, timerId = null, isRunning = false, activeSound = null;
         const sounds = {
-            lluvia: 'https://assets.mixkit.co/active_storage/sfx/2520/2520-preview.mp3', // Lluvia suave
+            lluvia: 'https://assets.mixkit.co/active_storage/sfx/2520/2520-preview.mp3',
             mar: 'https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3',
             naturaleza: 'https://www.soundjay.com/nature/sounds/forest-1.mp3',
-            zen: 'https://assets.mixkit.co/active_storage/sfx/1074/1074-preview.mp3', // Campana/cuenco
             ruido: 'https://www.soundjay.com/misc/sounds/white-noise-1.mp3',
             bell: 'https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3'
         };
@@ -115,22 +203,22 @@
             if (activeSound) activeSound.stop();
             const val = document.getElementById('audioSelect').value;
             if (val !== 'none' && isRunning) {
-                activeSound = new Howl({ src: [sounds[val]], loop: true, volume: 0.5 });
+                activeSound = new Howl({ src: [sounds[val]], loop: true, volume: 0.4 });
                 activeSound.play();
             }
         }
 
-        function toggleVisual() {
-            const orb = document.getElementById('orb');
-            orb.classList.toggle('mode-neblina');
-            orb.classList.toggle('mode-anillo');
+        function updateTheme(theme) {
+            document.body.className = 'theme-' + theme;
+            let color = theme === 'dia' ? 0x0071e3 : (theme === 'atardecer' ? 0xff4d6d : 0x00d4ff);
+            particleSystem.material.color.setHex(color);
         }
 
         function setT(m) {
             clearInterval(timerId); isRunning = false;
             timeLeft = m * 60; updateDisp();
-            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.control-group button').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + m).classList.add('active');
             document.getElementById('startBtn').innerText = "START";
         }
 
@@ -140,6 +228,9 @@
         }
 
         function toggle() {
+            // Unmute para navegadores
+            if (Howler.state === 'suspended') Howler.ctx.resume();
+
             if(isRunning) {
                 clearInterval(timerId); if (activeSound) activeSound.pause();
                 document.getElementById('startBtn').innerText = "RESUME";
@@ -151,12 +242,21 @@
                         clearInterval(timerId); 
                         new Howl({ src: [sounds.bell] }).play();
                         document.getElementById('sessionDots').innerHTML += '<div class="dot active"></div>';
+                        document.getElementById('startBtn').innerText = "START";
+                        isRunning = false;
                     }
                 }, 1000);
                 document.getElementById('startBtn').innerText = "PAUSE";
             }
             isRunning = !isRunning;
         }
+
+        window.onload = () => { init3D(); animate(); };
+        window.onresize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
     </script>
 </body>
 </html>
