@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenDoro Studio Pro</title>
+    <title>ZenDoro Studio | Pro Audio</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --bg: #000; --text: #fff; --accent: #007AFF;
-            --panel: rgba(28, 28, 30, 0.7); --border: rgba(255, 255, 255, 0.1);
+            --panel: rgba(28, 28, 30, 0.6); --border: rgba(255, 255, 255, 0.1);
         }
-        body.theme-dia { --bg: #F5F5F7; --text: #1D1D1F; --panel: rgba(255, 255, 255, 0.8); --border: rgba(0, 0, 0, 0.1); }
-        body.theme-atardecer { --bg: #1C151B; --accent: #FF3B30; }
-        body.theme-nublado { --bg: #2C2C2E; --accent: #8E8E93; }
+        body.theme-dia { --bg: #F5F5F7; --text: #1D1D1F; --panel: rgba(255, 255, 255, 0.7); --border: rgba(0, 0, 0, 0.1); }
+        body.theme-atardecer { --bg: #1c151b; --accent: #FF3B30; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: 1s; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: 1.5s; }
         
         #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
@@ -25,32 +24,28 @@
         }
 
         .panel { 
-            background: var(--panel); backdrop-filter: blur(30px); 
-            border: 1px solid var(--border); border-radius: 20px; padding: 20px;
-            display: flex; flex-direction: column; gap: 15px;
+            background: var(--panel); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--border); border-radius: 24px; padding: 25px;
+            display: flex; flex-direction: column; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
 
-        /* TIPOGRAFÍA Y UI */
-        h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-bottom: 5px; }
-        #timer { font-size: 7.5rem; font-weight: 200; letter-spacing: -4px; margin: 15px 0; font-variant-numeric: tabular-nums; }
-        .quote { font-size: 13px; opacity: 0.6; font-style: italic; min-height: 40px; }
+        h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.5; }
+        #timer { font-size: 8rem; font-weight: 200; letter-spacing: -5px; margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .quote { font-size: 13px; opacity: 0.6; line-height: 1.4; max-width: 300px; }
 
         button, select {
             background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            color: var(--text); padding: 12px; border-radius: 12px; font-size: 12px;
-            cursor: pointer; transition: 0.2s; width: 100%; text-align: left;
+            color: var(--text); padding: 14px; border-radius: 14px; font-size: 12px;
+            cursor: pointer; transition: 0.3s; width: 100%; text-align: left;
         }
-        button:hover { background: rgba(255,255,255,0.1); }
-        button.active { background: var(--text); color: var(--bg); font-weight: 600; }
+        button:hover { background: rgba(255,255,255,0.12); border-color: var(--accent); }
+        button.active { background: var(--text); color: var(--bg); font-weight: 700; border: none; }
 
         .main-btn { 
-            font-size: 1.5rem; background: var(--accent); color: #fff; border: none;
-            text-align: center; font-weight: 300; letter-spacing: 3px; margin-top: 20px;
+            font-size: 1.4rem; background: var(--accent); color: #fff; border: none;
+            text-align: center; font-weight: 300; letter-spacing: 4px; margin-top: 30px;
+            box-shadow: 0 0 20px rgba(0, 122, 255, 0.3);
         }
-
-        .session-dots { display: flex; gap: 6px; justify-content: center; margin-top: auto; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
-        .dot.fill { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
         .center { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
     </style>
@@ -61,19 +56,16 @@
 
     <main class="app-layout">
         <aside class="panel">
-            <h3>Visual Studio</h3>
-            <button onclick="changeVisual('ring')" class="v-btn active">Anillo Atómico</button>
-            <button onclick="changeVisual('sphere')" class="v-btn">Esfera de Energía</button>
-            <button onclick="changeVisual('cloud')" class="v-btn">Neblina Profunda</button>
-            
-            <h3 style="margin-top:20px">Sesiones</h3>
-            <div id="sessionDots" class="session-dots"></div>
+            <h3>Visual Studio Pro</h3>
+            <button onclick="setMode('flux')" class="v-btn active">Flujo de Cuerdas</button>
+            <button onclick="setMode('vortex')" class="v-btn">Vórtice 3D</button>
+            <button onclick="setMode('pulse')" class="v-btn">Pulso Atómico</button>
         </aside>
 
         <section class="center">
             <div id="timer">25:00</div>
-            <div id="quote" class="quote">"La disciplina es libertad."</div>
-            <div style="width: 280px;">
+            <div id="quote" class="quote">"El tiempo es el recurso más valioso."</div>
+            <div style="width: 300px;">
                 <button class="main-btn" id="startBtn" onclick="toggleTimer()">START</button>
             </div>
         </section>
@@ -86,67 +78,74 @@
 
             <h3>Rest Break</h3>
             <select id="restSelect">
-                <option value="5">5 min (Micro)</option>
-                <option value="10">10 min (Normal)</option>
-                <option value="15">15 min (Long)</option>
+                <option value="5">5m Micro Rest</option>
+                <option value="10">10m Recovery</option>
+                <option value="15">15m Long Break</option>
             </select>
 
-            <h3 style="margin-top:15px">Ambience</h3>
-            <select id="soundSelect" onchange="updateSound()">
+            <h3 style="margin-top:15px">Soundscape</h3>
+            <select id="soundSelect" onchange="updateAtmosphere()">
                 <option value="none">Silence</option>
-                <option value="white">White Noise</option>
-                <option value="zen">Zen Frequency</option>
+                <option value="white">Puro White Noise</option>
+                <option value="zen">Zen Frequency (432Hz)</option>
             </select>
 
-            <select onchange="updateTheme(this.value)" style="margin-top:10px">
+            <select onchange="document.body.className='theme-'+this.value" style="margin-top:10px">
                 <option value="noche">Midnight</option>
                 <option value="dia">Studio Light</option>
-                <option value="atardecer">Sunset</option>
-                <option value="nublado">Cloudy</option>
+                <option value="atardecer">Twilight</option>
             </select>
         </aside>
     </main>
 
     <script>
-        // --- MOTOR DE SONIDO (PRO GENERATIVO) ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let noiseNode = null;
+        // --- MOTOR DE AUDIO (GENERATIVO) ---
+        let audioCtx, noiseNode, gainNode;
 
-        function playNoise(type) {
-            stopNoise();
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playAtmosphere(type) {
+            stopAtmosphere();
+            if (type === 'none') return;
+
             const bufferSize = audioCtx.sampleRate * 2;
             const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+            if (type === 'white') {
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            } else {
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.sin(i * 0.01) * Math.random();
+            }
 
             noiseNode = audioCtx.createBufferSource();
             noiseNode.buffer = buffer;
             noiseNode.loop = true;
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = "lowpass";
-            filter.frequency.value = (type === 'white') ? 800 : 300;
-            const gain = audioCtx.createGain();
-            gain.gain.value = 0.03;
-            noiseNode.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.02;
+            noiseNode.connect(gainNode).connect(audioCtx.destination);
             noiseNode.start();
         }
 
-        function stopNoise() { if(noiseNode) { noiseNode.stop(); noiseNode = null; } }
+        function stopAtmosphere() { if(noiseNode) { noiseNode.stop(); noiseNode = null; } }
 
-        function playBell() {
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 3);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 4);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 4);
+        function playFinishBell() {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 3);
+            osc.connect(g).connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 3);
         }
 
-        // --- MOTOR 3D (DYNAMIC ORB) ---
+        // --- MOTOR 3D REFINADO ---
         let scene, camera, renderer, points, geometry;
-        let mode = 'ring';
-        const count = 3000;
+        let currentMode = 'flux';
+        const count = 4000;
 
         function init3D() {
             scene = new THREE.Scene();
@@ -159,10 +158,10 @@
             const pos = new Float32Array(count * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
             
-            const mat = new THREE.PointsMaterial({ size: 0.03, color: 0x007AFF, transparent: true, opacity: 0.8 });
+            const mat = new THREE.PointsMaterial({ size: 0.02, color: 0x007AFF, transparent: true, opacity: 0.6 });
             points = new THREE.Points(geometry, mat);
             scene.add(points);
-            camera.position.z = 5;
+            camera.position.z = 4;
             animate();
         }
 
@@ -170,31 +169,29 @@
             requestAnimationFrame(animate);
             const time = Date.now() * 0.001;
             const pos = geometry.attributes.position.array;
-            const pulse = isRunning ? Math.sin(time * 1.5) * 0.5 : 0;
 
             for(let i=0; i<count; i++) {
                 const i3 = i * 3;
-                const angle = (i / count) * Math.PI * 2;
-                if(mode === 'ring') {
-                    const r = 2 + pulse + Math.sin(time + angle * 4) * 0.1;
-                    pos[i3] = Math.cos(angle) * r;
-                    pos[i3+1] = Math.sin(angle) * r;
-                    pos[i3+2] = Math.sin(time + i) * 0.2;
-                } else if(mode === 'sphere') {
-                    const phi = Math.acos(-1 + (2 * i) / count);
-                    const theta = Math.sqrt(count * Math.PI) * phi;
-                    const r = 2 + pulse;
-                    pos[i3] = r * Math.cos(theta) * Math.sin(phi);
-                    pos[i3+1] = r * Math.sin(theta) * Math.sin(phi);
-                    pos[i3+2] = r * Math.cos(phi);
+                const t = (i / count) * Math.PI * 2;
+                
+                if(currentMode === 'flux') {
+                    pos[i3] = Math.cos(t + time) * (2 + Math.sin(time * 0.5 + t * 3) * 0.5);
+                    pos[i3+1] = Math.sin(t * 2 - time) * 1.5;
+                    pos[i3+2] = Math.sin(t + time * 0.8);
+                } else if(currentMode === 'vortex') {
+                    const r = 2 * Math.sqrt(i/count);
+                    pos[i3] = Math.cos(t + time * 2) * r;
+                    pos[i3+1] = Math.sin(t + time * 2) * r;
+                    pos[i3+2] = Math.tan(t * 0.1) * 0.5;
                 } else {
-                    pos[i3] = Math.cos(angle) * (1 + Math.random() * (2 + pulse));
-                    pos[i3+1] = Math.sin(angle) * (1 + Math.random() * (2 + pulse));
-                    pos[i3+2] = (Math.random() - 0.5) * 2;
+                    const r = 1.8 + (isRunning ? Math.sin(time*2)*0.4 : 0);
+                    pos[i3] = Math.cos(t) * Math.sin(time + i) * r;
+                    pos[i3+1] = Math.sin(t) * Math.cos(time + i) * r;
+                    pos[i3+2] = Math.cos(t) * r;
                 }
             }
             geometry.attributes.position.needsUpdate = true;
-            points.rotation.y += 0.002;
+            points.rotation.y += 0.001;
             renderer.render(scene, camera);
         }
 
@@ -202,17 +199,18 @@
         let timeLeft = 25 * 60, isRunning = false, timerId = null;
 
         function toggleTimer() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            initAudio(); // Desbloquea el sonido en la primera interacción
             if(isRunning) {
-                clearInterval(timerId); stopNoise();
+                clearInterval(timerId); stopAtmosphere();
                 document.getElementById('startBtn').innerText = "RESUME";
             } else {
-                updateSound();
+                updateAtmosphere();
                 timerId = setInterval(() => {
-                    timeLeft--; updateDisplay();
+                    timeLeft--; 
+                    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+                    document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                     if(timeLeft <= 0) {
-                        clearInterval(timerId); playBell(); stopNoise();
-                        document.getElementById('sessionDots').innerHTML += '<div class="dot fill"></div>';
+                        clearInterval(timerId); playFinishBell(); stopAtmosphere();
                         isRunning = false; document.getElementById('startBtn').innerText = "START";
                     }
                 }, 1000);
@@ -223,35 +221,29 @@
 
         function setTimer(m, btn) {
             clearInterval(timerId); isRunning = false;
-            timeLeft = m * 60; updateDisplay();
+            timeLeft = m * 60;
+            document.getElementById('timer').innerText = `${m}:00`;
             document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('startBtn').innerText = "START";
         }
 
-        function updateDisplay() {
-            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        function updateAtmosphere() {
+            if(isRunning) playAtmosphere(document.getElementById('soundSelect').value);
         }
 
-        function updateTheme(t) {
-            document.body.className = 'theme-' + t;
-            const colors = { noche: 0x007AFF, dia: 0x0071E3, atardecer: 0xFF3B30, nublado: 0x8E8E93 };
-            points.material.color.setHex(colors[t]);
-        }
-
-        function changeVisual(m) {
-            mode = m;
+        function setMode(m) {
+            currentMode = m;
             document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
         }
 
-        function updateSound() {
-            const s = document.getElementById('soundSelect').value;
-            if(isRunning && s !== 'none') playNoise(s); else stopNoise();
-        }
-
         window.onload = init3D;
+        window.onresize = () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        }
     </script>
 </body>
 </html>
