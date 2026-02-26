@@ -7,17 +7,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <style>
         :root {
-            --bg: #050505;
+            --bg: #121212; /* Un gris muy oscuro en lugar de negro total */
             --text: #ffffff;
-            --accent: rgba(255, 255, 255, 0.8);
-            --dim: rgba(255, 255, 255, 0.2);
-            --blur-color: rgba(255, 255, 255, 0.05);
-            --transition-speed: 2s;
+            --accent: rgba(255, 255, 255, 0.9);
+            --dim: rgba(255, 255, 255, 0.4);
+            --orb-color: rgba(255, 255, 255, 0.15);
         }
 
-        body.theme-amanecer { --bg: #0f141a; --blur-color: rgba(255, 100, 50, 0.08); }
-        body.theme-dia { --bg: #f5f5f5; --text: #1a1a1a; --dim: rgba(0,0,0,0.2); --blur-color: rgba(0,0,0,0.04); }
-        body.theme-tarde { --bg: #1a1005; --blur-color: rgba(255, 150, 0, 0.08); }
+        /* Temas con más brillo para que no sean "agujeros negros" */
+        body.theme-noche { --bg: #0d0d0d; --orb-color: rgba(255, 255, 255, 0.1); }
+        body.theme-amanecer { --bg: #161b22; --orb-color: rgba(255, 120, 80, 0.2); --text: #ffe0d0; }
+        body.theme-tarde { --bg: #1d1610; --orb-color: rgba(255, 180, 50, 0.2); --text: #ffefd5; }
+        body.theme-dia { --bg: #ffffff; --text: #1a1a1a; --dim: rgba(0,0,0,0.3); --orb-color: rgba(0,0,0,0.08); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -30,105 +31,94 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: background-color var(--transition-speed) ease;
+            transition: background-color 2s ease, color 1s ease;
             overflow: hidden;
         }
 
-        /* Esfera de Respiración 3D */
-        .orb-container {
+        /* SISTEMA DE RESPIRACIÓN */
+        .orb-wrapper {
             position: absolute;
             z-index: -1;
-            filter: blur(80px);
-            animation: breathe 10s infinite ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .orb {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: var(--orb-color);
             transition: all 1s ease;
         }
-        .orb {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, var(--blur-color) 0%, transparent 75%);
-            border-radius: 50%;
-        }
+
+        /* Modo Círculo: Bordes definidos */
+        .mode-circulo { border: 2px solid var(--dim); filter: blur(0px); }
+        /* Modo Flujo: Neblina 3D */
+        .mode-flujo { border: none; filter: blur(60px); }
+
+        .anim-breathe { animation: breathe 10s infinite ease-in-out; }
 
         @keyframes breathe {
-            0%, 100% { transform: scale(1); opacity: 0.2; }
-            50% { transform: scale(1.6); opacity: 0.6; }
-        }
-
-        /* Efecto de Finalización (Flash) */
-        .flash-finish {
-            animation: finishFlash 1.5s ease-out;
-        }
-        @keyframes finishFlash {
-            0% { background-color: var(--text); }
-            100% { background-color: var(--bg); }
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.7); opacity: 0.8; }
         }
 
         .container { text-align: center; z-index: 10; width: 100%; }
         
         #timer {
-            font-size: clamp(5rem, 20vw, 10rem);
+            font-size: clamp(5rem, 18vw, 9rem);
             font-weight: 100;
-            letter-spacing: -6px;
-            line-height: 1;
-            margin: 10px 0;
-            transition: transform 0.5s ease;
+            letter-spacing: -4px;
+            margin-bottom: 10px;
         }
 
         .estoicismo {
             font-size: 0.75rem;
             color: var(--dim);
-            max-width: 400px;
-            margin: 30px auto;
-            min-height: 40px;
+            margin: 20px auto;
             letter-spacing: 2px;
             text-transform: uppercase;
-            transition: opacity 1s;
+            max-width: 80%;
         }
 
-        .panel { display: flex; gap: 10px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
+        .panel { display: flex; gap: 10px; margin: 10px 0; justify-content: center; flex-wrap: wrap; }
 
-        button {
-            background: none;
+        button, select {
+            background: rgba(255,255,255,0.05);
             border: 1px solid var(--dim);
-            color: var(--dim);
-            padding: 6px 14px;
-            border-radius: 20px;
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 15px;
             cursor: pointer;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            transition: 0.3s;
         }
-        button:hover, button.active { border-color: var(--text); color: var(--text); }
+        button:hover, button.active { border-color: var(--text); background: rgba(255,255,255,0.1); }
 
-        .dot-container { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
-        .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--dim); transition: 0.5s; }
-        .dot.filled { background: var(--text); box-shadow: 0 0 8px var(--text); transform: scale(1.5); }
+        .main-toggle { font-size: 1.5rem; border: none; margin-top: 30px; font-weight: 200; opacity: 0.7; background: none; }
 
-        select {
-            background: none; color: var(--dim); border: 1px solid var(--dim);
-            padding: 5px; border-radius: 15px; font-size: 0.6rem; text-transform: uppercase; outline: none;
-        }
-
-        .main-toggle { font-size: 1.2rem; border: none; margin-top: 40px; color: var(--text); opacity: 0.5; }
-        .main-toggle:hover { opacity: 1; }
-
-        .legal-tag { position: absolute; bottom: 20px; font-size: 0.5rem; color: var(--dim); letter-spacing: 2px; }
+        .session-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
+        .dot.filled { background: var(--text); box-shadow: 0 0 8px var(--text); }
     </style>
 </head>
 <body class="theme-noche">
 
-    <div class="orb-container" id="orb"><div class="orb"></div></div>
+    <div class="orb-wrapper">
+        <div id="visualOrb" class="orb mode-flujo anim-breathe"></div>
+    </div>
 
     <div class="container">
-        <div id="sessionDots" class="dot-container"></div>
+        <div id="sessionDots" class="session-dots"></div>
         <div id="timer">25:00</div>
-        <div id="quote" class="estoicismo">"La paciencia es amarga, pero su fruto es dulce."</div>
+        <div id="quote" class="estoicismo">"Persiste y resiste."</div>
 
         <div class="panel">
-            <button onclick="setT(25)" class="active" id="b25">25</button>
-            <button onclick="setT(50)" id="b50">50</button>
-            <button onclick="setT(90)" id="b90">90</button>
-            <button onclick="setT(5)" id="b5">Rest</button>
+            <button onclick="setT(25)" class="active">25</button>
+            <button onclick="setT(50)">50</button>
+            <button onclick="setT(90)">90</button>
+            <button onclick="setT(5)">Rest</button>
         </div>
 
         <div class="panel">
@@ -137,20 +127,21 @@
                 <option value="rain">🌧️ Lluvia</option>
                 <option value="waves">🌊 Mar</option>
                 <option value="forest">🍃 Bosque</option>
-                <option value="cafe">☕ Biblioteca</option>
+                <option value="cafe">☕ Café</option>
             </select>
+            
             <select onchange="document.body.className = 'theme-' + this.value">
                 <option value="noche">🌙 Noche</option>
                 <option value="amanecer">🌅 Amanecer</option>
                 <option value="dia">☀️ Día</option>
                 <option value="tarde">🌇 Tarde</option>
             </select>
+
+            <button onclick="toggleVisual()">🌀 Cambiar Visual</button>
         </div>
 
         <button class="main-toggle" id="startBtn" onclick="toggle()">START</button>
     </div>
-
-    <div class="legal-tag">ZENDORO // LOCAL FOCUS TOOL // NO DATA COLLECTED</div>
 
     <script>
         let timeLeft = 25 * 60;
@@ -158,29 +149,36 @@
         let isRunning = false;
         let ambientSound = null;
 
-        const quotes = [
-            "El hombre conquista el mundo conquistándose a sí mismo.",
-            "No expliques tu filosofía, encárnala.",
-            "La mejor respuesta a la ira es el silencio.",
-            "Tú tienes poder sobre tu mente, no sobre los eventos externos.",
-            "La dificultad es lo que despierta al genio."
-        ];
+        const quotes = ["No es que tengamos poco tiempo, sino que perdemos mucho.", "La felicidad depende de nosotros mismos.", "Dificultades fortalecen la mente.", "Vivir es luchar."];
 
-        // Sonidos externos (Créditos a sus autores originales en plataformas de libre uso)
-        const sounds = {
-            bell: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3'], volume: 0.6 }),
-            rain: new Howl({ src: ['https://www.soundjay.com/nature/sounds/rain-01.mp3'], loop: true, volume: 0.3 }),
-            waves: new Howl({ src: ['https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3'], loop: true, volume: 0.3 }),
-            forest: new Howl({ src: ['https://www.soundjay.com/nature/sounds/forest-1.mp3'], loop: true, volume: 0.3 }),
-            cafe: new Howl({ src: ['https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3'], loop: true, volume: 0.3 })
+        // URLs de respaldo más estables
+        const soundUrls = {
+            bell: 'https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3',
+            rain: 'https://www.soundjay.com/nature/sounds/rain-01.mp3',
+            waves: 'https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3',
+            forest: 'https://www.soundjay.com/nature/sounds/forest-1.mp3',
+            cafe: 'https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3'
         };
+
+        let bellSound = new Howl({ src: [soundUrls.bell] });
+
+        function toggleVisual() {
+            const orb = document.getElementById('visualOrb');
+            if(orb.classList.contains('mode-flujo')) {
+                orb.classList.remove('mode-flujo');
+                orb.classList.add('mode-circulo');
+            } else {
+                orb.classList.remove('mode-circulo');
+                orb.classList.add('mode-flujo');
+            }
+        }
 
         function setT(m) {
             clearInterval(timerId); isRunning = false;
             timeLeft = m * 60;
             updateDisp();
             document.querySelectorAll('.panel button').forEach(b => b.classList.remove('active'));
-            if(event) event.target.classList.add('active');
+            event.target.classList.add('active');
             document.getElementById('startBtn').innerText = "START";
         }
 
@@ -191,6 +189,9 @@
         }
 
         function toggle() {
+            // Activar contexto de audio (requerido por navegadores)
+            if (Howler.state === 'suspended') Howler.ctx.resume();
+
             if(isRunning) {
                 clearInterval(timerId);
                 document.getElementById('startBtn').innerText = "RESUME";
@@ -198,43 +199,25 @@
                 timerId = setInterval(() => {
                     timeLeft--;
                     updateDisp();
-                    if(timeLeft % 300 === 0) changeQuote();
-                    if(timeLeft <= 0) finishSession();
+                    if(timeLeft <= 0) finish();
                 }, 1000);
                 document.getElementById('startBtn').innerText = "PAUSE";
             }
             isRunning = !isRunning;
         }
 
-        function finishSession() {
+        function finish() {
             clearInterval(timerId);
-            isRunning = false;
-            sounds.bell.play();
-            document.body.classList.add('flash-finish');
-            setTimeout(() => document.body.classList.remove('flash-finish'), 1500);
-            
-            const dot = document.createElement('div');
-            dot.className = 'dot filled';
-            document.getElementById('sessionDots').appendChild(dot);
-            
+            bellSound.play();
+            document.getElementById('sessionDots').innerHTML += '<div class="dot filled"></div>';
             document.getElementById('startBtn').innerText = "RESTART";
-            document.getElementById('timer').innerText = "DONE";
-        }
-
-        function changeQuote() {
-            const el = document.getElementById('quote');
-            el.style.opacity = 0;
-            setTimeout(() => { 
-                el.innerText = `"${quotes[Math.floor(Math.random()*quotes.length)]}"`; 
-                el.style.opacity = 1; 
-            }, 1000);
         }
 
         function changeAmbient() {
             if(ambientSound) ambientSound.stop();
             const val = document.getElementById('ambientSelect').value;
             if(val !== 'none') {
-                ambientSound = sounds[val];
+                ambientSound = new Howl({ src: [soundUrls[val]], loop: true, volume: 0.3 });
                 ambientSound.play();
             }
         }
